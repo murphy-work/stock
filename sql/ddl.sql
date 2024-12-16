@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS fund
     name                      VARCHAR(20)    NOT NULL,
     exchange                  VARCHAR(2)     NULL,
     type                      VARCHAR(10)    NOT NULL,
-    quotation_daily_sync_time TIMESTAMP           NULL,
+    quotation_daily_sync_time TIMESTAMP      NULL,
     opening_price             NUMERIC(16, 3) NULL,
     highest_price             NUMERIC(16, 3) NULL,
     lowest_price              NUMERIC(16, 3) NULL,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS fund_quotation_daily
 (
 
     id             VARCHAR(14)    NOT NULL PRIMARY KEY,
-    code      VARCHAR(6)     NULL,
+    code           VARCHAR(6)     NULL,
     trade_date     DATE           NULL,
     opening_price  NUMERIC(16, 3) NULL,
     highest_price  NUMERIC(16, 3) NULL,
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS stock
     exchange                  VARCHAR(2)  NOT NULL,
     industry_code             VARCHAR(3)  NULL,
     industry_name             VARCHAR(30) NULL,
-    quotation_daily_sync_time TIMESTAMP        NULL
+    quotation_daily_sync_time TIMESTAMP   NULL
 );
 COMMENT ON TABLE stock IS '股票';
 COMMENT ON COLUMN stock.code IS '代码';
@@ -93,7 +93,7 @@ CREATE INDEX IF NOT EXISTS stock_industry_code_index ON stock (industry_code);
 CREATE TABLE IF NOT EXISTS stock_quotation_daily
 (
     id                 VARCHAR(14)    NOT NULL PRIMARY KEY,
-    code         VARCHAR(6)     NULL,
+    code               VARCHAR(6)     NULL,
     trade_date         DATE           NULL,
     opening_price      NUMERIC(16, 2) NULL,
     highest_price      NUMERIC(16, 2) NULL,
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS index
     code                      VARCHAR(8)  NOT NULL PRIMARY KEY,
     name                      VARCHAR(10) NOT NULL,
     exchange                  VARCHAR(4)  NOT NULL,
-    quotation_daily_sync_time TIMESTAMP        NULL
+    quotation_daily_sync_time TIMESTAMP   NULL
 );
 COMMENT ON TABLE index IS '股票指数';
 COMMENT ON COLUMN index.code IS '代码';
@@ -139,7 +139,7 @@ COMMENT ON COLUMN index.quotation_daily_sync_time IS '每日行情同步时间';
 create table index_quotation_daily
 (
     id                 VARCHAR(14)    NOT NULL PRIMARY KEY,
-    code         VARCHAR(6)     NULL,
+    code               VARCHAR(6)     NULL,
     trade_date         DATE           NULL,
     opening_price      NUMERIC(16, 2) NULL,
     highest_price      NUMERIC(16, 2) NULL,
