@@ -1,10 +1,10 @@
-CREATE TABLE fund
+CREATE TABLE IF NOT EXISTS fund
 (
     code                      VARCHAR(6)     NOT NULL PRIMARY KEY,
     name                      VARCHAR(20)    NOT NULL,
     exchange                  VARCHAR(2)     NULL,
     type                      VARCHAR(10)    NOT NULL,
-    quotation_daily_sync_time TIME           NULL,
+    quotation_daily_sync_time TIMESTAMP           NULL,
     opening_price             NUMERIC(16, 3) NULL,
     highest_price             NUMERIC(16, 3) NULL,
     lowest_price              NUMERIC(16, 3) NULL,
@@ -29,11 +29,11 @@ COMMENT ON COLUMN fund.amplitude IS '振幅（%）';
 COMMENT ON COLUMN fund.percent_change IS '涨跌幅（%）';
 COMMENT ON COLUMN fund.price_change IS '涨跌额（元）';
 
-CREATE TABLE fund_quotation_daily
+CREATE TABLE IF NOT EXISTS fund_quotation_daily
 (
 
     id             VARCHAR(14)    NOT NULL PRIMARY KEY,
-    fund_code      VARCHAR(6)     NULL,
+    code      VARCHAR(6)     NULL,
     trade_date     DATE           NULL,
     opening_price  NUMERIC(16, 3) NULL,
     highest_price  NUMERIC(16, 3) NULL,
@@ -46,7 +46,7 @@ CREATE TABLE fund_quotation_daily
 );
 COMMENT ON TABLE fund_quotation_daily IS '基金每日行情';
 COMMENT ON COLUMN fund_quotation_daily.id IS '编号 基金代码+交易时间 15900120240229';
-COMMENT ON COLUMN fund_quotation_daily.fund_code IS '基金代码';
+COMMENT ON COLUMN fund_quotation_daily.code IS '基金代码';
 COMMENT ON COLUMN fund_quotation_daily.trade_date IS '交易时间';
 COMMENT ON COLUMN fund_quotation_daily.opening_price IS '开盘价（元）';
 COMMENT ON COLUMN fund_quotation_daily.highest_price IS '最高价（元）';
@@ -56,10 +56,10 @@ COMMENT ON COLUMN fund_quotation_daily.trading_volume IS '成交量（股）';
 COMMENT ON COLUMN fund_quotation_daily.amplitude IS '振幅（%）';
 COMMENT ON COLUMN fund_quotation_daily.percent_change IS '涨跌幅（%）';
 COMMENT ON COLUMN fund_quotation_daily.price_change IS '涨跌额（元）';
-CREATE INDEX fund_quotation_daily_fund_code_index ON fund_quotation_daily (fund_code);
-CREATE INDEX fund_quotation_daily_trade_date_index ON fund_quotation_daily (trade_date);
+CREATE INDEX IF NOT EXISTS fund_quotation_daily_code_index ON fund_quotation_daily (code);
+CREATE INDEX IF NOT EXISTS fund_quotation_daily_trade_date_index ON fund_quotation_daily (trade_date);
 
-CREATE TABLE industry
+CREATE TABLE IF NOT EXISTS industry
 (
     code        VARCHAR(3)  NOT NULL PRIMARY KEY,
     name        VARCHAR(30) NOT NULL,
@@ -72,14 +72,14 @@ COMMENT ON COLUMN industry.name IS '二级行业名称';
 COMMENT ON COLUMN industry.code_parent IS '所属一级行业代码';
 COMMENT ON COLUMN industry.name_parent IS '所属一级行业名称';
 
-CREATE TABLE stock
+CREATE TABLE IF NOT EXISTS stock
 (
     code                      VARCHAR(6)  NOT NULL PRIMARY KEY,
     name                      VARCHAR(20) NOT NULL,
     exchange                  VARCHAR(2)  NOT NULL,
     industry_code             VARCHAR(3)  NULL,
     industry_name             VARCHAR(30) NULL,
-    quotation_daily_sync_time TIME        NULL
+    quotation_daily_sync_time TIMESTAMP        NULL
 );
 COMMENT ON TABLE stock IS '股票';
 COMMENT ON COLUMN stock.code IS '代码';
@@ -88,12 +88,12 @@ COMMENT ON COLUMN stock.exchange IS '交易所';
 COMMENT ON COLUMN stock.industry_code IS '证监会二级行业代码';
 COMMENT ON COLUMN stock.industry_name IS '证监会二级行业名称';
 COMMENT ON COLUMN stock.quotation_daily_sync_time IS '每日行情同步时间';
-CREATE INDEX stock_industry_code_index ON stock (industry_code);
+CREATE INDEX IF NOT EXISTS stock_industry_code_index ON stock (industry_code);
 
-CREATE TABLE stock_quotation_daily
+CREATE TABLE IF NOT EXISTS stock_quotation_daily
 (
     id                 VARCHAR(14)    NOT NULL PRIMARY KEY,
-    stock_code         VARCHAR(6)     NULL,
+    code         VARCHAR(6)     NULL,
     trade_date         DATE           NULL,
     opening_price      NUMERIC(16, 2) NULL,
     highest_price      NUMERIC(16, 2) NULL,
@@ -108,7 +108,7 @@ CREATE TABLE stock_quotation_daily
 );
 COMMENT ON TABLE stock_quotation_daily IS '股票每日行情';
 COMMENT ON COLUMN stock_quotation_daily.id IS '编号 股票代码+交易时间 00000120240229';
-COMMENT ON COLUMN stock_quotation_daily.stock_code IS '股票代码';
+COMMENT ON COLUMN stock_quotation_daily.code IS '股票代码';
 COMMENT ON COLUMN stock_quotation_daily.trade_date IS '交易时间';
 COMMENT ON COLUMN stock_quotation_daily.opening_price IS '开盘价（元）';
 COMMENT ON COLUMN stock_quotation_daily.highest_price IS '最高价（元）';
@@ -120,15 +120,15 @@ COMMENT ON COLUMN stock_quotation_daily.amplitude IS '振幅（%）';
 COMMENT ON COLUMN stock_quotation_daily.turnover_rate IS '换手率（%）';
 COMMENT ON COLUMN stock_quotation_daily.percent_change IS '涨跌幅（%）';
 COMMENT ON COLUMN stock_quotation_daily.price_change IS '涨跌额（元）';
-CREATE INDEX stock_quotation_daily_stock_code_index ON stock_quotation_daily (stock_code);
-CREATE INDEX stock_quotation_daily_trade_date_index ON stock_quotation_daily (trade_date);
+CREATE INDEX IF NOT EXISTS stock_quotation_daily_code_index ON stock_quotation_daily (code);
+CREATE INDEX IF NOT EXISTS stock_quotation_daily_trade_date_index ON stock_quotation_daily (trade_date);
 
-CREATE TABLE index
+CREATE TABLE IF NOT EXISTS index
 (
     code                      VARCHAR(8)  NOT NULL PRIMARY KEY,
     name                      VARCHAR(10) NOT NULL,
     exchange                  VARCHAR(4)  NOT NULL,
-    quotation_daily_sync_time TIME        NULL
+    quotation_daily_sync_time TIMESTAMP        NULL
 );
 COMMENT ON TABLE index IS '股票指数';
 COMMENT ON COLUMN index.code IS '代码';
@@ -139,7 +139,7 @@ COMMENT ON COLUMN index.quotation_daily_sync_time IS '每日行情同步时间';
 create table index_quotation_daily
 (
     id                 VARCHAR(14)    NOT NULL PRIMARY KEY,
-    index_code         VARCHAR(6)     NULL,
+    code         VARCHAR(6)     NULL,
     trade_date         DATE           NULL,
     opening_price      NUMERIC(16, 2) NULL,
     highest_price      NUMERIC(16, 2) NULL,
@@ -154,7 +154,7 @@ create table index_quotation_daily
 );
 COMMENT ON TABLE index_quotation_daily IS '指数每日行情';
 COMMENT ON COLUMN index_quotation_daily.id IS '编号 指数代码+交易时间 00000120240229';
-COMMENT ON COLUMN index_quotation_daily.index_code IS '指数代码';
+COMMENT ON COLUMN index_quotation_daily.code IS '指数代码';
 COMMENT ON COLUMN index_quotation_daily.trade_date IS '交易时间';
 COMMENT ON COLUMN index_quotation_daily.opening_price IS '开盘价（元）';
 COMMENT ON COLUMN index_quotation_daily.highest_price IS '最高价（元）';
@@ -166,6 +166,6 @@ COMMENT ON COLUMN index_quotation_daily.amplitude IS '振幅（%）';
 COMMENT ON COLUMN index_quotation_daily.turnover_rate IS '换手率（%）';
 COMMENT ON COLUMN index_quotation_daily.percent_change IS '涨跌幅（%）';
 COMMENT ON COLUMN index_quotation_daily.price_change IS '涨跌额（元）';
-CREATE INDEX index_quotation_daily_stock_code_index ON index_quotation_daily (index_code);
-CREATE INDEX index_quotation_daily_trade_date_index ON index_quotation_daily (trade_date);
+CREATE INDEX IF NOT EXISTS index_quotation_daily_code_index ON index_quotation_daily (code);
+CREATE INDEX IF NOT EXISTS index_quotation_daily_trade_date_index ON index_quotation_daily (trade_date);
 
