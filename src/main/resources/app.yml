@@ -1,0 +1,17 @@
+server.port: 80
+
+solon:
+  app:
+    name: stock
+  logging.appender.console.level: INFO
+
+wood:
+  db:
+    jdbcUrl: jdbc:postgresql://:5432/stock
+    driverClassName: org.postgresql.Driver
+    username:
+    password:
+    minIdle: 1
+
+mairui:
+  licence:
