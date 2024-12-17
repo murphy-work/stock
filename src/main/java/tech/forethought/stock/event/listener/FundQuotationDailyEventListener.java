@@ -30,7 +30,7 @@ public class FundQuotationDailyEventListener implements EventListener<FundQuotat
     public void onEvent(FundQuotationDailyEvent event) {
         long fundNum = fundRepository.countAll();
         int start = 0;
-        int size = 3;
+        int size = 5;
         AtomicInteger current = new AtomicInteger(start);
         LocalDateTime startTime = LocalDateTime.now();
         Timer timer = new Timer();
@@ -39,7 +39,7 @@ public class FundQuotationDailyEventListener implements EventListener<FundQuotat
             public void run() {
                 if (fundNum <= current.get()) {
                     timer.cancel();
-                    log.info("FundQuotationDailyEvent finished, cost: {}", ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
+                    log.info("FundQuotationDailyEvent finished, cost: {}s", ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
                     return;
                 }
                 log.info("FundQuotationDailyEvent {} -> {}, start", current.get(), current.get() + size - 1);
@@ -56,7 +56,7 @@ public class FundQuotationDailyEventListener implements EventListener<FundQuotat
                         ChronoUnit.SECONDS.between(eventStartTime, eventEndTime));
                 current.getAndAdd(size);
             }
-        }, 0, 5 * 1000);
+        }, 0, 3 * 1000);
     }
 
 }

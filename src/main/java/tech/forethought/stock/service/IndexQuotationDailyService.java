@@ -54,7 +54,7 @@ public class IndexQuotationDailyService {
 
     @Tran
     public void syncHistory(String code, String exchange, String level, String licence) throws InterruptedException {
-        // 同步股票历史日k
+        // 同步指数历史日k
         long start = System.currentTimeMillis();
         Map<String, IndexQuotationDaily> map = new HashMap<>();
         Optional.ofNullable(zsClient.hfsjy(exchange + code, level, licence)).ifPresent(list -> list.forEach(fsjy -> {
@@ -75,7 +75,6 @@ public class IndexQuotationDailyService {
             return;
         }
         indexQuotationDailyRepository.insertList(map.values().stream().toList());
-//        map.values().forEach(quotation -> indexQuotationDailyRepository.upsertById(quotation));
         Index index = new Index();
         index.setCode(code);
         indexRepository.refreshSyncTime(index);
@@ -127,16 +126,6 @@ public class IndexQuotationDailyService {
         indexQuotationDailyRepository.upsertById(quotation);
         Index index = new Index();
         index.setCode(code);
-//        index.setOpeningPrice(quotation.getOpeningPrice());
-//        index.setHighestPrice(quotation.getHighestPrice());
-//        index.setLowestPrice(quotation.getLowestPrice());
-//        index.setClosingPrice(quotation.getClosingPrice());
-//        index.setTradingVolume(quotation.getTradingVolume());
-//        index.setTransactionAmount(quotation.getTransactionAmount());
-//        index.setAmplitude(quotation.getAmplitude());
-//        index.setTurnoverRate(quotation.getTurnoverRate());
-//        index.setPercentChange(quotation.getPercentChange());
-//        index.setPriceChange(quotation.getPriceChange());
         indexRepository.refreshSyncTime(index);
         log.info(code + " cost: " + (System.currentTimeMillis() - start) + " ms");
     }

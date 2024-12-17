@@ -9,11 +9,15 @@ import org.noear.solon.data.annotation.Tran;
 import tech.forethought.stock.adapter.client.HSLTClient;
 import tech.forethought.stock.adapter.client.HSZBClient;
 import tech.forethought.stock.adapter.client.HSZBLClient;
+import tech.forethought.stock.adapter.client.HSZGClient;
 import tech.forethought.stock.adapter.convertor.HSLTConvertor;
+import tech.forethought.stock.adapter.convertor.HSZGConvertor;
 import tech.forethought.stock.adapter.model.HSLT;
+import tech.forethought.stock.entity.Industry;
 import tech.forethought.stock.entity.Stock;
 import tech.forethought.stock.entity.StockQuotationDaily;
 import tech.forethought.stock.event.StockQuotationDailyEvent;
+import tech.forethought.stock.repository.IndustryRepository;
 import tech.forethought.stock.repository.StockQuotationDailyRepository;
 import tech.forethought.stock.repository.StockRepository;
 
@@ -28,6 +32,8 @@ public class StockQuotationDailyService {
     private StockQuotationDailyRepository stockQuotationDailyRepository;
     @Inject
     private StockRepository stockRepository;
+    @Inject
+    private IndustryRepository industryRepository;
 
     @NamiClient
     private HSLTClient hsltClient;
@@ -35,6 +41,8 @@ public class StockQuotationDailyService {
     private HSZBLClient hszblClient;
     @NamiClient
     private HSZBClient hszbClient;
+    @NamiClient
+    private HSZGClient hszgClient;
 
     @Inject("${mairui.licence}")
     private String licence;
@@ -52,10 +60,45 @@ public class StockQuotationDailyService {
                     .map(HSLTConvertor::toStock).collect(Collectors.toList());
             if (!stocks.isEmpty()) {
                 stockRepository.insertList(stocks);
+                this.syncIndustry();
             }
         }
         EventBus.publishAsync(new StockQuotationDailyEvent());
         log.info("StockJob end!");
+    }
+
+    public void syncIndustry() {
+        // 同步行业列表
+        List<Industry> industryList = HSZGConvertor.toIndustry(hszgClient.list(licence).stream()
+                .filter(hszg -> null != hszg.getType1() && null != hszg.getType2() && null != hszg.getLevel() && null != hszg.getIsleaf())
+                .filter(hszg -> 0 == hszg.getType1() && 5 == hszg.getType2() && 3 == hszg.getLevel() && 1 == hszg.getIsleaf())
+                .collect(Collectors.toList()));
+        industryRepository.upsertList(industryList);
+        // 同步股票所属行业
+        industryList.forEach(industry -> {
+            String code = industry.getCode();
+            String name = industry.getName();
+            log.info("sync industry {} {} start", code, name);
+            try {
+                List<HSLT> hsltList = hszgClient.gg("hangye_Z" + code, licence);
+                if (null != hsltList) {
+                    stockRepository.updateListById(hsltList.stream()
+                            .filter(hslt -> "sh".equals(hslt.getJys()) || "sz".equals(hslt.getJys()))
+                            .map(hslt -> {
+                                Stock stock = HSLTConvertor.toStock(hslt);
+                                stock.setIndustryCode(code);
+                                stock.setIndustryName(name);
+                                return stock;
+                            }).collect(Collectors.toList()));
+                }
+                Thread.sleep(2 * 1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalStateException e) {
+                log.warn("sync industry " + code + " " + name + " failed, stock not found!", e);
+            }
+            log.info("sync industry {} {} end", code, name);
+        });
     }
 
     @Tran
@@ -64,10 +107,6 @@ public class StockQuotationDailyService {
         long start = System.currentTimeMillis();
         Map<String, StockQuotationDaily> map = new HashMap<>();
         Optional.ofNullable(hszblClient.fsjy(code, level, licence)).ifPresent(list -> list.forEach(fsjy -> {
-//            if (!LocalDate.parse(fsjy.getD()).isEqual(LocalDate.parse("2024-04-08")) &&
-//                    !LocalDate.parse(fsjy.getD()).isAfter(LocalDate.parse("2024-04-08"))) {
-//                return;
-//            }
             StockQuotationDaily quotation = this.getStockQuotation(map, code, fsjy.getD());
             quotation.setOpeningPrice(fsjy.getO());
             quotation.setHighestPrice(fsjy.getH());
@@ -81,7 +120,7 @@ public class StockQuotationDailyService {
             quotation.setPriceChange(fsjy.getZde());
         }));
         if (map.isEmpty()) {
-//            log.info(code + " cost0: " + (System.currentTimeMillis() - start) + " ms");
+            log.info(code + " cost: " + (System.currentTimeMillis() - start) + " ms");
             return;
         }
         stockQuotationDailyRepository.insertList(map.values().stream().toList());
@@ -137,16 +176,6 @@ public class StockQuotationDailyService {
         stockQuotationDailyRepository.upsertById(quotation);
         Stock stock = new Stock();
         stock.setCode(code);
-//        stock.setOpeningPrice(quotation.getOpeningPrice());
-//        stock.setHighestPrice(quotation.getHighestPrice());
-//        stock.setLowestPrice(quotation.getLowestPrice());
-//        stock.setClosingPrice(quotation.getClosingPrice());
-//        stock.setTradingVolume(quotation.getTradingVolume());
-//        stock.setTransactionAmount(quotation.getTransactionAmount());
-//        stock.setAmplitude(quotation.getAmplitude());
-//        stock.setTurnoverRate(quotation.getTurnoverRate());
-//        stock.setPercentChange(quotation.getPercentChange());
-//        stock.setPriceChange(quotation.getPriceChange());
         stockRepository.refreshSyncTime(stock);
         log.info(code + " cost: " + (System.currentTimeMillis() - start) + " ms");
     }

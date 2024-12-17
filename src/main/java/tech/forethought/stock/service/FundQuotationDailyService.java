@@ -54,7 +54,7 @@ public class FundQuotationDailyService {
 
     @Tran
     public void syncHistory(String code, String exchange, String level, String licence) throws InterruptedException {
-        // 同步股票历史日k
+        // 同步基金历史日k
         long start = System.currentTimeMillis();
         Map<String, FundQuotationDaily> map = new HashMap<>();
         Optional.ofNullable(jjClient.lskx(exchange + code, level, licence)).ifPresent(list -> list.forEach(fsjy -> {
@@ -73,7 +73,6 @@ public class FundQuotationDailyService {
             return;
         }
         fundQuotationDailyRepository.insertList(map.values().stream().toList());
-//        map.values().forEach(quotation -> fundQuotationDailyRepository.upsertById(quotation));
         Fund fund = new Fund();
         fund.setCode(code);
         fundRepository.refreshSyncTime(fund);
@@ -123,14 +122,6 @@ public class FundQuotationDailyService {
         fundQuotationDailyRepository.upsertById(quotation);
         Fund fund = new Fund();
         fund.setCode(code);
-//        fund.setOpeningPrice(quotation.getOpeningPrice());
-//        fund.setHighestPrice(quotation.getHighestPrice());
-//        fund.setLowestPrice(quotation.getLowestPrice());
-//        fund.setClosingPrice(quotation.getClosingPrice());
-//        fund.setTradingVolume(quotation.getTradingVolume());
-//        fund.setAmplitude(quotation.getAmplitude());
-//        fund.setPercentChange(quotation.getPercentChange());
-//        fund.setPriceChange(quotation.getPriceChange());
         fundRepository.refreshSyncTime(fund);
         log.info(code + " cost: " + (System.currentTimeMillis() - start) + " ms");
     }

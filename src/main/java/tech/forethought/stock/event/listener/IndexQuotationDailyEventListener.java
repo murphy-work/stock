@@ -30,7 +30,7 @@ public class IndexQuotationDailyEventListener implements EventListener<IndexQuot
     public void onEvent(IndexQuotationDailyEvent event) {
         long indexNum = indexRepository.countAll();
         int start = 0;
-        int size = 2;
+        int size = 5;
         AtomicInteger current = new AtomicInteger(start);
         LocalDateTime startTime = LocalDateTime.now();
         Timer timer = new Timer();
@@ -39,7 +39,7 @@ public class IndexQuotationDailyEventListener implements EventListener<IndexQuot
             public void run() {
                 if (indexNum <= current.get()) {
                     timer.cancel();
-                    log.info("IndexQuotationDailyEvent finished, cost: {}", ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
+                    log.info("IndexQuotationDailyEvent finished, cost: {}s", ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
                     return;
                 }
                 log.info("IndexQuotationDailyEvent {} -> {}, start", current.get(), current.get() + size - 1);
@@ -56,7 +56,7 @@ public class IndexQuotationDailyEventListener implements EventListener<IndexQuot
                         ChronoUnit.SECONDS.between(eventStartTime, eventEndTime));
                 current.getAndAdd(size);
             }
-        }, 0, 5 * 1000);
+        }, 0, 3 * 1000);
     }
 
 }

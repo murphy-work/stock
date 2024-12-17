@@ -31,4 +31,10 @@ public class StockApiController {
     public void execJobDaily() {
         stockQuotationDailyService.jobDaily();
     }
+
+    @Get
+    @Mapping("/industry/sync")
+    public void syncIndustry() {
+        stockQuotationDailyService.syncIndustry();
+    }
 }

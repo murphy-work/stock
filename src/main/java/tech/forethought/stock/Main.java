@@ -15,9 +15,11 @@ package tech.forethought.stock;
 import lombok.extern.slf4j.Slf4j;
 import org.noear.solon.Solon;
 import org.noear.solon.annotation.SolonMain;
+import org.noear.solon.scheduling.annotation.EnableScheduling;
 import org.noear.wood.WoodConfig;
 
 @SolonMain
+@EnableScheduling
 @Slf4j
 public class Main {
     public static void main(String[] args) {

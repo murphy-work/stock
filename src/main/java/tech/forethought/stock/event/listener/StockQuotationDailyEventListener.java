@@ -30,7 +30,7 @@ public class StockQuotationDailyEventListener implements EventListener<StockQuot
     public void onEvent(StockQuotationDailyEvent event) {
         long stockNum = stockRepository.countAll();
         int start = 0;
-        int size = 3;
+        int size = 5;
         AtomicInteger current = new AtomicInteger(start);
         LocalDateTime startTime = LocalDateTime.now();
         Timer timer = new Timer();
@@ -39,14 +39,14 @@ public class StockQuotationDailyEventListener implements EventListener<StockQuot
             public void run() {
                 if (stockNum <= current.get()) {
                     timer.cancel();
-                    log.info("StockQuotationDailyEvent finished, cost: {}", ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
+                    log.info("StockQuotationDailyEvent finished, cost: {}s", ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
                     return;
                 }
                 log.info("StockQuotationDailyEvent {} -> {}, start", current.get(), current.get() + size - 1);
                 LocalDateTime eventStartTime = LocalDateTime.now();
                 stockRepository.listRange(current.get(), size).parallelStream().forEach(stock -> {
                     try {
-                        stockQuotationDailyService.syncLatest(stock.getCode(), level, licence);
+                        stockQuotationDailyService.syncHistory(stock.getCode(), level, licence);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -56,7 +56,7 @@ public class StockQuotationDailyEventListener implements EventListener<StockQuot
                         ChronoUnit.SECONDS.between(eventStartTime, eventEndTime));
                 current.getAndAdd(size);
             }
-        }, 0, 5 * 1000);
+        }, 0, 3 * 1000);
     }
 
 }

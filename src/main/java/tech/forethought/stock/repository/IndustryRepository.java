@@ -16,6 +16,10 @@ public class IndustryRepository {
         industryMapper.insertList(industryList);
     }
 
+    public void upsertList(List<Industry> industryList) {
+        industryList.forEach(industry -> industryMapper.upsert(industry, true));
+    }
+
     public List<Industry> listRange(int start, int size) {
         return industryMapper.selectList(start, size, null);
     }
