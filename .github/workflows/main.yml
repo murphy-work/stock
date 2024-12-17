@@ -1,0 +1,14 @@
+name: stock
+on: workflow_dispatch
+jobs:
+  gradle_build:
+    name: gradle 构建
+    runs-on: ubuntu-latest
+    steps: 
+      - name: 路径为
+        run: pwd
+      - name: 项目配置
+        run: echo ${{secrets.MAIRUI_LICENCE}}
+      - name: 环境信息
+        run: gradle -v
+        run: java --version
