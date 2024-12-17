@@ -11,4 +11,4 @@ jobs:
         run: echo ${{secrets.MAIRUI_LICENCE}}
       - name: 环境信息
         run: gradle -v
-        run: java --version
+      - run: java --version
