@@ -2,13 +2,17 @@ name: stock
 on: workflow_dispatch
 jobs:
   gradle_build:
-    name: gradle 构建
+    name: Build by gradle
     runs-on: ubuntu-latest
     steps: 
-      - name: 路径为
-        run: pwd
-      - name: 项目配置
-        run: echo ${{secrets.MAIRUI_LICENCE}}
-      - name: 环境信息
-        run: gradle -v
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'graalvm'
+          java-version: '21'
+          architecture: x64
       - run: java --version
+      - run: gradle -v
+      - run: gradle build
+      - run: ls
+      - run: ls build/libs
